@@ -27,15 +27,15 @@ df = pd.read_csv(
 df.head()
 
 #shape
-#print(df.shape)
+print(df.shape)
 
 #column info
-#df.info()
+df.info()
 
 #subscription distribution graph
 print(df['y'].value_counts())
 df['y'].value_counts().plot(kind='bar')
-#plt.show()
+plt.show()
 
 #percentage calculation
 yes_percentage = (df['y'].value_counts()['yes'] / len(df))*100
@@ -220,7 +220,7 @@ rf_model = Pipeline(
 
         ('classifier',
          RandomForestClassifier(
-             n_estimators=200,
+             n_estimators=50,
              random_state=42,
              class_weight='balanced'
          ))
@@ -410,12 +410,7 @@ print(feature_importance.head(10))
 
 import pickle
 
-with open(
-    "customer_subscription_model.pkl",
-    "wb"
-) as file:
-
-    pickle.dump(
-        rf_model,
-        file
-    )
+pickle.dump(
+    rf_model,
+    open("customer_subscription_model.pkl","wb")
+)

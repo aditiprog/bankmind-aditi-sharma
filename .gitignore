@@ -1,0 +1,5 @@
+bank-full.csv
+__pycache__/
+*.pyc
+.env
+customer_subscription_model.pkl

@@ -10,7 +10,7 @@
 ### Everyone
 
 **1. What percentage of customers have `y = yes`? What does this imbalance mean for evaluation?**
->  **11.7%** of customers subscribed (5,289 of 45,211); the rest (88.3%) did not. This imbalance means **accuracy alone is misleading** — a model predicting "no" for everyone would score ~88% accuracy while catching zero real subscribers. Precision, recall, and F1-score are needed instead. *(Full breakdown: Section 3)*
+>  **11.70%** of customers subscribed (5,289 of 45,211); the rest (88.3%) did not. This imbalance means **accuracy alone is misleading** — a model predicting "no" for everyone would score ~88% accuracy while catching zero real subscribers. Precision, recall, and F1-score are needed instead. 
 
 **2. Which job category had the highest subscription rate? Does this make sense intuitively?**
 >  **Student**, at **28.68%**, followed closely by **retired** at **22.79%** — both well above the 11.7% dataset average. Yes, this makes intuitive sense: both groups have more free time for a full sales conversation and fit a low-risk savings product profile (students saving up, retirees protecting capital). *(Full table: Section 3)*
@@ -104,7 +104,8 @@ Every column shows the full 45,211 non-null count, which confirms the "zero miss
 **Class distribution:**
 - No subscription: 39,922
 - Subscription: 5,289
-- **Only 11.7% of customers subscribed.**
+- **Only 11.698480458295547% of customers subscribed.**
+<img width="800" height="684" alt="Screenshot 2026-06-21 000253" src="https://github.com/user-attachments/assets/695d8a21-4892-402b-a849-216d5a63b35d" />
 
 ### Why this matters
 
@@ -132,8 +133,10 @@ Actual subscription rate by job category, computed via `pd.crosstab(df['job'], d
 | Housemaid | 8.79% |
 | Entrepreneur | 8.27% |
 | Blue-collar | 7.28% |
+<img width="792" height="685" alt="Screenshot 2026-06-21 000650" src="https://github.com/user-attachments/assets/21f02d24-1b23-41ea-8368-ad32ab7a43a6" />
 
-**Students (28.68%)** have the highest subscription rate, followed closely by **retirees (22.79%)** — both well above the dataset's overall average of 11.7%, and roughly 3–4x higher than the lowest category, blue-collar (7.28%).
+
+**Students (28.68%)** have the highest subscription rate, followed closely by **retirees (22.79%)** — both well above the dataset's overall average of 11.7%, and the lowest category, blue-collar (7.28%).
 
 This tracks intuitively: both groups tend to have more free time to engage in a full conversation (which ties directly into why `duration` turned out to be the top predictive feature — see Section 7), and both often have financial profiles suited to a low-risk, fixed-term product — students saving up, retirees prioritizing capital safety over growth. They're also less likely to be the target of high-pressure, high-volume sales pushes, so when they do engage, the interest tends to be genuine. The balance data backs this up too — subscribers carry a noticeably higher average balance (₹1,804) than non-subscribers (₹1,304), suggesting subscription correlates with having more disposable savings to lock away.
 

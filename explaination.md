@@ -31,6 +31,37 @@ The dataset holds real records from a Portuguese bank — demographics, financia
 
 **Target (`y`):** `yes` → subscribed · `no` → did not subscribe
 
+### `df.info()` output
+
+```
+<class 'pandas.DataFrame'>
+RangeIndex: 45211 entries, 0 to 45210
+Data columns (total 17 columns):
+ #   Column     Non-Null Count  Dtype
+---  ------     --------------  -----
+ 0   age        45211 non-null  int64
+ 1   job        45211 non-null  str
+ 2   marital    45211 non-null  str
+ 3   education  45211 non-null  str
+ 4   default    45211 non-null  str
+ 5   balance    45211 non-null  int64
+ 6   housing    45211 non-null  str
+ 7   loan       45211 non-null  str
+ 8   contact    45211 non-null  str
+ 9   day        45211 non-null  int64
+ 10  month      45211 non-null  str
+ 11  duration   45211 non-null  int64
+ 12  campaign   45211 non-null  int64
+ 13  pdays      45211 non-null  int64
+ 14  previous   45211 non-null  int64
+ 15  poutcome   45211 non-null  str
+ 16  y          45211 non-null  str
+dtypes: int64(7), str(10)
+memory usage: 5.9 MB
+```
+
+Every column shows the full 45,211 non-null count, which confirms the "zero missing values" finding directly from the data rather than just the `isnull().sum()` check later on. Seven numeric columns (`int64`) and ten categorical/text columns — the categorical ones are exactly what get routed through `OneHotEncoder` during preprocessing, and the numeric ones through `StandardScaler`.
+
 ---
 
 ## 3. Exploratory Data Analysis
@@ -52,9 +83,26 @@ Because of this, **accuracy alone cannot be trusted**. Precision, recall, and F1
 
 ### Job category and subscription rate
 
-On this dataset, **students** and **retired** customers consistently show the highest subscription rates (often 20–28%), well above categories like blue-collar or entrepreneur (often under 10%).
+Actual subscription rate by job category, computed via `pd.crosstab(df['job'], df['y'], normalize='index')`:
 
-This tracks intuitively: both groups tend to have more time to engage in a full conversation (which ties directly into why `duration` turned out to be the top predictive feature — see Section 7), and both often have financial profiles suited to a low-risk, fixed-term product — students saving up, retirees prioritizing capital safety over growth. They're also less likely to be the target of high-pressure, high-volume sales pushes, so when they do engage, the interest tends to be genuine.
+| Job | Subscription Rate |
+|---|---|
+| **Student** | **28.68%** |
+| **Retired** | **22.79%** |
+| Unemployed | 15.50% |
+| Management | 13.76% |
+| Admin. | 12.20% |
+| Self-employed | 11.84% |
+| Unknown | 11.81% |
+| Technician | 11.06% |
+| Services | 8.88% |
+| Housemaid | 8.79% |
+| Entrepreneur | 8.27% |
+| Blue-collar | 7.28% |
+
+**Students (28.68%)** have the highest subscription rate, followed closely by **retirees (22.79%)** — both well above the dataset's overall average of 11.7%, and roughly 3–4x higher than the lowest category, blue-collar (7.28%).
+
+This tracks intuitively: both groups tend to have more free time to engage in a full conversation (which ties directly into why `duration` turned out to be the top predictive feature — see Section 7), and both often have financial profiles suited to a low-risk, fixed-term product — students saving up, retirees prioritizing capital safety over growth. They're also less likely to be the target of high-pressure, high-volume sales pushes, so when they do engage, the interest tends to be genuine. The balance data backs this up too — subscribers carry a noticeably higher average balance (₹1,804) than non-subscribers (₹1,304), suggesting subscription correlates with having more disposable savings to lock away.
 
 ---
 
@@ -66,6 +114,14 @@ This tracks intuitively: both groups tend to have more time to engage in a full 
 - Target encoded: `yes → 1`, `no → 0`
 - Categorical features one-hot encoded (ML models can't interpret raw text categories)
 - A `ColumnTransformer` pipeline applies preprocessing identically at training time and prediction time, preventing train/serve skew
+- Stratified 80/20 train-test split, preserving the class ratio in both sets:
+
+| Split | No (0) | Yes (1) | Total |
+|---|---|---|---|
+| Train | 31,937 | 4,231 | 36,168 |
+| Test | 7,985 | 1,058 | 9,043 |
+
+- After encoding, the feature space expands from 16 raw columns to **51 columns** (one-hot encoding the 9 categorical fields multiplies out their categories)
 
 ---
 
@@ -90,16 +146,29 @@ Chosen to capture nonlinear relationships and feature interactions, and to expos
 
 | Metric | Score |
 |---|---|
-| Accuracy | **90.57%** |
-| Precision | **69.38%** |
-| Recall | 34.69% |
-| F1 Score | 46.25% |
+| Accuracy | **89.85%** |
+| Precision | 55.79% |
+| Recall | 63.71% |
+| F1 Score | **59.49%** |
 
-Higher accuracy and precision, but notably **lower recall** — it misses more than half the real subscribers.
+Confusion matrix-level detail from the classification report:
+
+```
+              precision    recall  f1-score   support
+           0       0.95      0.93      0.94      7985
+           1       0.56      0.64      0.59      1058
+```
+
+Random Forest improves on *every* metric simultaneously compared to Logistic Regression here — higher accuracy, higher precision, and a higher F1, though Logistic Regression still wins on raw recall (81.47% vs. 63.71%).
 
 ### The key trade-off
 
-Random Forest *looks* better on accuracy alone (90.57% vs. 84.57%) — but its F1-score is actually **lower** than Logistic Regression's (46.25% vs. 55.27%). Since the cost of missing a real subscriber outweighs the cost of a few wasted calls, **accuracy alone would have pointed to the wrong model.** This is the clearest evidence in the project for why a single metric isn't enough.
+| Model | Accuracy | Precision | Recall | F1 Score |
+|---|---|---|---|---|
+| Logistic Regression | 84.57% | 41.82% | **81.47%** | 55.27% |
+| Random Forest | **89.85%** | **55.79%** | 63.71% | **59.49%** |
+
+Random Forest comes out ahead on **F1 (59.49% vs. 55.27%)**, making it the stronger overall model for this problem — but the trade-off between the two is still real and worth naming explicitly: Logistic Regression catches significantly more actual subscribers (81% recall vs. 64%), at the cost of far more false positives (only 42% precision vs. 56%). In a real deployment, the right choice depends on which error is more expensive for the bank — missing a subscriber (favors Logistic Regression) or wasting an RM's time on a bad lead (favors Random Forest). Random Forest was selected as the main model here because it offers the best *balance* of the two, reflected in its higher F1-score.
 
 ---
 
@@ -110,18 +179,28 @@ With only 11.7% of customers subscribing, accuracy rewards a model for simply fa
 - **Precision** → of everyone flagged as a likely subscriber, how many actually were? (protects RM time)
 - **Recall** → of everyone who actually subscribed, how many did the model catch? (protects revenue opportunity)
 
-F1 forces a balance between the two, which is exactly the trade-off this business problem demands.
+F1 forces a balance between the two, which is exactly the trade-off this business problem demands — and it's the metric that correctly identifies Random Forest (F1 = 59.49%) as the stronger model overall, even though Logistic Regression wins on recall alone (81.47%) and would look like the better choice if recall were judged in isolation.
 
 ---
 
 ## 7. Feature Importance Analysis
 
-**Top features (Random Forest):**
-1. **Duration**
-2. Balance
-3. Age
-4. Day
-5. Previous campaign outcome
+**Top 10 features (Random Forest), from `feature_importances_`:**
+
+| Rank | Feature | Importance |
+|---|---|---|
+| 1 | `duration` | 0.346083 |
+| 2 | `balance` | 0.074402 |
+| 3 | `age` | 0.071811 |
+| 4 | `day` | 0.065828 |
+| 5 | `campaign` | 0.033227 |
+| 6 | `pdays` | 0.032711 |
+| 7 | `poutcome = success` | 0.029949 |
+| 8 | `contact = unknown` | 0.029079 |
+| 9 | `housing = yes` | 0.020867 |
+| 10 | `previous` | 0.018356 |
+
+`duration` alone accounts for nearly **35% of total importance** — more than the next three features combined — making it by a wide margin the single most decisive signal in the model.
 
 ### Why is Duration the top feature?
 
@@ -133,23 +212,27 @@ Call duration is a strong behavioral signal: a disengaged customer ends the call
 
 ## 8. Sample Prediction Analysis
 
-**Example customer:**
+Five test-set customers (3 predicted YES, 2 predicted NO), pulled directly from the model run:
 
-| Field | Value |
-|---|---|
-| Age | 64 |
-| Job | Retired |
-| Balance | 109 |
+| Customer ID | Age | Job | Balance | Housing | Loan | Actual | Prediction | Probability |
+|---|---|---|---|---|---|---|---|---|
+| 43965 | 64 | Retired | 109 | No | No | Yes | **YES** | **98.0%** |
+| 43303 | 42 | Management | 1,205 | No | No | No | YES | 56.0% |
+| 42761 | 61 | Retired | 89 | No | No | No | YES | 56.0% |
+| 1392 | 40 | Blue-collar | 640 | Yes | Yes | No | NO | 0.0% |
+| 7518 | 44 | Technician | 378 | Yes | No | No | NO | 0.0% |
 
-**Model output:** `YES` — **83.5% probability**
+### A closer look — do I agree with these calls?
 
-### A closer look — do I agree with this call?
+**Customer 43965 (64, retired, balance 109, predicted YES at 98.0%)** is the standout case, and it's the one this section originally focused on. The age and job line up well with the job-category trend in Section 3 — retirees subscribe at roughly double the dataset average. And the *actual* outcome confirms the model was right: this customer really did subscribe.
 
-Partially, and it's worth walking through why.
+That said, I'd still flag the same underlying tension: a balance of just 109 is unusually low for someone committing to a term deposit, and `duration` is the model's dominant feature by far (34.6% importance — see Section 7). It's likely this customer had a long, engaged call — possibly reflected in a high `duration` value and a `poutcome = success` from a prior campaign, both of which are heavily weighted features — and that engagement, not the balance, is what's driving the 98% confidence. The model got it right here, but it's a useful reminder that the *reason* behind a correct prediction is still worth checking, not just the outcome.
 
-The **age and job** support the prediction well — retired customers skew toward subscribing, consistent with the job-category trend in Section 3. That part checks out.
+**Customers 43303 and 42761 (both predicted YES at 56%, both actually NO)** are the more interesting cases for scrutiny. Both sit barely above the 50% decision threshold, and both predictions were **wrong** — the model overestimated their likelihood to subscribe. This is a good illustration of the precision trade-off discussed in Section 5: Random Forest's precision is only 55.79%, meaning almost half of its "yes" predictions don't pan out, and these two examples are exactly that failure mode in action. A 56% probability is a weak signal, not a confident one, and in a real deployment an RM should treat anything this close to the threshold with real caution rather than treating it the same as the 98% case above.
 
-The **balance of 109** is where I'd push back. That's a very low balance for someone to commit to a term deposit, which typically requires locking away a meaningful sum. Since `duration` is the model's dominant feature, there's a real risk the high probability is being driven by call length rather than actual capacity to subscribe — for example, a long call full of questions from someone who ultimately can't afford the product. Before trusting this prediction at face value, I'd want to check this customer's `duration` and `poutcome` values directly. It's a useful reminder that feature importance at the model level doesn't guarantee every individual prediction is well-reasoned — predictions still need to be sanity-checked case by case.
+**Customers 1392 and 7518 (both predicted NO at 0.0%, both actually NO)** are the easy, confidently-correct cases — both have housing and/or personal loans, which the feature importance table shows the model weighs meaningfully (`housing = yes` is in the top 10). Existing debt obligations make a new term deposit commitment less likely, and the model's near-zero probability reflects that cleanly.
+
+**Overall takeaway:** the model performs well at the extremes (very high or very low probability) but is noticeably less reliable in the middle band around 50–60%, which is exactly where precision and recall trade off against each other — and exactly where a relationship manager's own judgment should weigh more heavily than the model's score.
 
 ---
 
@@ -223,4 +306,4 @@ If 200 relationship managers hit the endpoint at once, a few things would likely
 
 BankMind demonstrates a complete, end-to-end ML workflow: **data analysis → preprocessing → model training → evaluation → interpretation → API deployment → AI-powered explanation.**
 
-Beyond just producing a prediction, the project reflects a deliberate set of decisions — choosing F1 over accuracy because of class imbalance, recognizing that Random Forest's higher accuracy actually hid a *worse* F1-score, treating `duration` as informative but not actionable, and scrutinizing individual predictions rather than trusting aggregate metrics blindly. The result is a system that doesn't just output a probability, but supports a relationship manager in making sense of — and acting on — that number.
+Beyond just producing a prediction, the project reflects a deliberate set of decisions — choosing F1 over accuracy because of class imbalance, selecting Random Forest because it wins on F1 despite Logistic Regression's edge in raw recall, treating `duration` as informative but not actionable, and scrutinizing individual predictions (including the misfires in the mid-50% range) rather than trusting aggregate metrics blindly. The result is a system that doesn't just output a probability, but supports a relationship manager in making sense of — and acting on — that number.

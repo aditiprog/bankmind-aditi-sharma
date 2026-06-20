@@ -5,6 +5,8 @@
 It combines a classic, well-tested ML pipeline with a modern API layer, making it equally useful as a **data science showcase** and a **deployable backend service**.
 
 ---
+<img width="1919" height="960" alt="Screenshot 2026-06-20 202211" src="https://github.com/user-attachments/assets/a8e294b5-77f5-4551-8ae6-401489bf1700" />
+
 
 ## ✨ Why BankMind?
 
@@ -149,10 +151,15 @@ You now have a live ML API running locally with auto-generated Swagger documenta
 ---
 ## demo video link 
 google drive link- 
+- https://drive.google.com/drive/folders/1vuVZAHIyl63RnyqKWEiyHjASyeoyC3RJ
 
 
 ## screenshots
 <img width="1919" height="960" alt="Screenshot 2026-06-20 202211" src="https://github.com/user-attachments/assets/99edc393-5df3-4bbf-8f25-17480b83b08d" />
+<img width="1919" height="1019" alt="Screenshot 2026-06-20 210219" src="https://github.com/user-attachments/assets/21346b6a-44cb-4950-904a-9f1fc7991ce8" />
+<img width="1919" height="995" alt="Screenshot 2026-06-20 210148" src="https://github.com/user-attachments/assets/8bd9d5bc-83ae-4ca0-a971-fbaf76991671" />
+<img width="1913" height="1021" alt="Screenshot 2026-06-20 210117" src="https://github.com/user-attachments/assets/fa8b66e1-e6cc-46e5-9284-a94d79e648f7" />
+
 
 
 ## 📌 Use Cases

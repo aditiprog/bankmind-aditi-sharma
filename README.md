@@ -5,7 +5,7 @@
 It combines a classic, well-tested ML pipeline with a modern API layer, making it equally useful as a **data science showcase** and a **deployable backend service**.
 
 ---
-<img width="1919" height="960" alt="Screenshot 2026-06-20 202211" src="https://github.com/user-attachments/assets/a8e294b5-77f5-4551-8ae6-401489bf1700" />
+<img width="1901" height="1079" alt="Screenshot 2026-06-20 231211" src="https://github.com/user-attachments/assets/959bb62d-4f96-46e7-9264-71ca7173d86d" />
 
 
 ## ✨ Why BankMind?
@@ -155,10 +155,9 @@ google drive link-
 
 
 ## screenshots
-<img width="1919" height="960" alt="Screenshot 2026-06-20 202211" src="https://github.com/user-attachments/assets/99edc393-5df3-4bbf-8f25-17480b83b08d" />
-<img width="1919" height="1019" alt="Screenshot 2026-06-20 210219" src="https://github.com/user-attachments/assets/21346b6a-44cb-4950-904a-9f1fc7991ce8" />
-<img width="1919" height="995" alt="Screenshot 2026-06-20 210148" src="https://github.com/user-attachments/assets/8bd9d5bc-83ae-4ca0-a971-fbaf76991671" />
-<img width="1913" height="1021" alt="Screenshot 2026-06-20 210117" src="https://github.com/user-attachments/assets/fa8b66e1-e6cc-46e5-9284-a94d79e648f7" />
+<img width="1902" height="1079" alt="Screenshot 2026-06-20 231422" src="https://github.com/user-attachments/assets/4a412b29-7bd1-4d2a-a92a-0474c0dcc6f0" />
+<img width="1902" height="1079" alt="Screenshot 2026-06-20 231250" src="https://github.com/user-attachments/assets/e9e2d368-c506-4618-9622-6b3a4a48ced4" />
+<img width="1899" height="1075" alt="Screenshot 2026-06-20 231526" src="https://github.com/user-attachments/assets/3fd2e742-24fe-4aaf-b7a3-d396e304fa9f" />
 
 
 
@@ -173,3 +172,7 @@ google drive link-
 ## 📄 License
 
 This project is open for learning and demonstration purposes. Feel free to fork, adapt, and build on it.
+
+## author 
+# aditi sharma 
+# CSE( CYBER SECURITY AND DIGITAL FORENSICS)

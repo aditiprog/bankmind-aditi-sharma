@@ -3,6 +3,39 @@
 
 ---
 
+## 📌 Required Submission Answers
+
+> *The sections below answer every required question directly. Full reasoning, data, and tables backing each answer are in the numbered sections that follow.*
+
+### Everyone
+
+**1. What percentage of customers have `y = yes`? What does this imbalance mean for evaluation?**
+>  **11.7%** of customers subscribed (5,289 of 45,211); the rest (88.3%) did not. This imbalance means **accuracy alone is misleading** — a model predicting "no" for everyone would score ~88% accuracy while catching zero real subscribers. Precision, recall, and F1-score are needed instead. *(Full breakdown: Section 3)*
+
+**2. Which job category had the highest subscription rate? Does this make sense intuitively?**
+>  **Student**, at **28.68%**, followed closely by **retired** at **22.79%** — both well above the 11.7% dataset average. Yes, this makes intuitive sense: both groups have more free time for a full sales conversation and fit a low-risk savings product profile (students saving up, retirees protecting capital). *(Full table: Section 3)*
+
+### Track B adds
+
+**1. Which feature had the highest importance in your tree-based model? Why?**
+> **`duration`** (call length), at **0.346 importance** — nearly 35% of total importance, more than the next three features combined. It's the top feature because call length is a direct behavioral proxy for engagement: disinterested customers end calls quickly, genuinely interested ones stay on longer. *(Full table: Section 7)*
+
+**2. Why is F1 better than accuracy for this dataset?**
+> Because of the 11.7%/88.3% imbalance, accuracy rewards a model for defaulting to the majority "no" class. F1 (the harmonic mean of precision and recall) can't be gamed this way — it forces a balance between catching real subscribers and not wasting RM time on bad leads. F1 is also what correctly identifies **Random Forest (59.49% F1)** as the stronger model overall, even though Logistic Regression has higher raw recall. *(Full comparison: Section 6)*
+
+**3. Pick one sample prediction — do you agree with the model's call?**
+> **Customer 43303** (age 42, management, balance ₹1,205) was predicted **YES at 56%** — and the actual outcome was **NO**. I don't agree with this call in hindsight: 56% is barely above the decision threshold, a weak signal rather than a confident one, and it reflects Random Forest's known precision gap (55.79%) — almost half its "yes" calls don't pan out. *(Full walkthrough: Section 8)*
+
+### Track C adds
+
+**1. What would break first with 200 RMs hitting `/predict` simultaneously? What would you change?**
+>  Most likely first failure: the **Groq LLM call sitting inside the prediction path** — if `/predict` and `/explain` aren't cleanly separated, every request waits on an external API round-trip, and Groq's rate limits throttle the system before FastAPI itself struggles. **The fix I'd prioritize:** keep `/predict` fully synchronous and self-contained (in-memory model, zero external calls), and move the Groq explanation to its own endpoint. *(Full breakdown: Section 11)*
+
+**2. What does the LLM explanation add over just showing a probability score?**
+> It translates a bare number like "78%" into a plain-language reason and a suggested RM approach — business language instead of a stat. **Honest caveat:** it adds no new predictive power, only narrates the model's existing output, and can sound plausible without being strictly grounded in the model's real decision logic if not carefully prompted. *(Full discussion: Section 10)*
+
+---
+
 ## 1. Project Overview
 
 BankMind is a machine learning system built on the **UCI Bank Marketing Dataset** to predict whether a customer will subscribe to a term deposit after a marketing campaign.
